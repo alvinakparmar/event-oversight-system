@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase, getURL } from '@/lib/supabase' // ✅ Import getURL
 
 export default function GoogleButton({ redirectTo = '/' }) {
   const [loading, setLoading] = useState(false)
@@ -9,14 +9,15 @@ export default function GoogleButton({ redirectTo = '/' }) {
   const handleGoogleLogin = async () => {
     setLoading(true)
     try {
-      const origin = window.location.origin
+      // ✅ Use getURL() instead of window.location.origin
+      const origin = getURL()
       console.log('🔍 Starting Google login from:', origin)
       console.log('🔍 Will redirect to:', redirectTo)
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${origin}/auth/callback?redirect_to=${redirectTo}`,
+          redirectTo: `${origin}auth/callback?redirect_to=${redirectTo}`,
         },
       })
 
