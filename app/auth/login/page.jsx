@@ -1,14 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import GoogleButton from '@/components/GoogleButton'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
@@ -16,6 +17,28 @@ export default function LoginPage() {
     email: '',
     password: ''
   })
+
+  // ✅ Check if user is already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        console.log('✅ User already logged in, redirecting to home')
+        router.push('/')
+      }
+    }
+    checkSession()
+  }, [router])
+
+  // ✅ Handle Google OAuth callback errors
+  useEffect(() => {
+    const error = searchParams.get('error')
+    const errorDescription = searchParams.get('error_description')
+    
+    if (error) {
+      setError(errorDescription || 'Google login failed. Please try again.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -34,7 +57,7 @@ export default function LoginPage() {
       setSuccess(true)
       
       setTimeout(() => {
-        router.push('/events')
+        router.push('/')
       }, 1500)
 
     } catch (err) {
@@ -172,7 +195,8 @@ export default function LoginPage() {
             <hr style={{ flex: '1', border: 'none', borderTop: '1px solid var(--border-color)' }} />
           </div>
 
-          <GoogleButton redirectTo="/events" />
+          {/* ✅ GoogleButton with redirect to home */}
+          <GoogleButton redirectTo="/" />
 
           <div 
             style={{ 

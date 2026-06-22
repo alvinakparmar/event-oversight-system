@@ -6,9 +6,11 @@ import { NextResponse } from 'next/server'
 export async function GET(request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const redirectTo = requestUrl.searchParams.get('redirect_to') || '/'
 
   console.log('🔍 Callback URL:', requestUrl.toString())
   console.log('🔍 Code:', code)
+  console.log('🔍 Redirect to:', redirectTo)
 
   if (!code) {
     console.log('❌ No code provided')
@@ -61,8 +63,12 @@ export async function GET(request) {
 
     console.log('✅ Session set successfully for user:', data?.user?.email)
 
-    // ✅ Redirect to home page
-    return NextResponse.redirect(new URL('/', requestUrl.origin))
+    // ✅ Get the session to confirm it's set
+    const { data: sessionData } = await supabase.auth.getSession()
+    console.log('✅ Session confirmed:', sessionData?.session ? 'Valid' : 'None')
+
+    // ✅ Redirect to the intended page (default: /)
+    return NextResponse.redirect(new URL(redirectTo, requestUrl.origin))
 
   } catch (err) {
     console.error('❌ Callback error:', err)

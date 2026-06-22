@@ -1,23 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
-export default function GoogleButton({ redirectTo = '/events' }) {
+export default function GoogleButton({ redirectTo = '/' }) {
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
   
   const handleGoogleLogin = async () => {
     setLoading(true)
     try {
       const origin = window.location.origin
       console.log('🔍 Starting Google login from:', origin)
+      console.log('🔍 Will redirect to:', redirectTo)
       
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${origin}/auth/callback`,
+          redirectTo: `${origin}/auth/callback?redirect_to=${redirectTo}`,
         },
       })
 
